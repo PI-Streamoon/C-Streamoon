@@ -1,0 +1,3 @@
+[submodule "B-Streamoon"]
+	path = B-Streamoon
+	url = https://github.com/PI-Streamoon/B-Streamoon.git

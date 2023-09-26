@@ -86,7 +86,9 @@ consoleData = {
     "MemoryPercent" : [],
     "MemoryUsed" : [],
     "MemoryTotal" : [],
-    "Disk" : []
+    "Disk" : [],
+    "Upload": [],
+    "Download": []
 }
 cpuQuantity = psutil.cpu_count(logical=True)
 for i in range(cpuQuantity):
@@ -103,8 +105,8 @@ while True:
     memPercent = memory.percent
     memoryUsed = round((memory.used / 1024 / 1024 / 1000), 1)   
     memoryTotal = round((memory.total / 1024 / 1024 / 1000), 1)
-    upload = round((psutil.net_io_counters().bytes_sent / 1e6),1)
-    download = round((psutil.net_io_counters().bytes_recv / 1e6),1)
+    upload = round((psutil.net_io_counters().bytes_sent / (1024**2)),1)
+    download = round((psutil.net_io_counters().bytes_recv / (1024**2)),1)
 
     diskPartitions = psutil.disk_partitions()
     diskPercent = psutil.disk_usage(diskPartitions[0].mountpoint)                      
@@ -130,6 +132,8 @@ while True:
     consoleData["MemoryUsed"].append(memoryUsed)
     consoleData["MemoryTotal"].append(memoryTotal)
     consoleData["Disk"].append(diskPercent.percent)
+    consoleData["Upload"].append(upload)
+    consoleData["Download"].append(download)
     
     #Integração slack!
     mensagemSlack = ""
@@ -398,8 +402,8 @@ while True:
         mySql_insert_query_memory_used = "INSERT INTO registro (idRegistro, registro, dtHora, fkComponenteServidor) VALUES (null, " + str(memoryUsed) + ", '" + str(dateNow) + "', 3);"
         mySql_insert_query_memory_total = "INSERT INTO registro (idRegistro, registro, dtHora, fkComponenteServidor) VALUES (null, " + str(memoryTotal) + ", '" + str(dateNow) + "', 4);"
         mySql_insert_query_disc_percent = "INSERT INTO registro (idRegistro, registro, dtHora, fkComponenteServidor) VALUES (null, " + str(diskPercent.percent) + ", '" + str(dateNow) + "', 5);"
-        mySql_insert_query_download = "INSERT INTO registro (idRegistro, registro, dtHora, fkComponenteServidor) VALUES (null, " + str(download) + ", '" + str(dateNow) + "', 6);"
         mySql_insert_query_upload = "INSERT INTO registro (idRegistro, registro, dtHora, fkComponenteServidor) VALUES (null, " + str(upload) + ", '" + str(dateNow) + "', 6);"
+        mySql_insert_query_download = "INSERT INTO registro (idRegistro, registro, dtHora, fkComponenteServidor) VALUES (null, " + str(download) + ", '" + str(dateNow) + "', 7);"
 
         cursor = connection.cursor()
         cursor.execute(mySql_insert_query_cpu_percent)

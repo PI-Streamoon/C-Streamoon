@@ -105,8 +105,8 @@ while True:
     memPercent = memory.percent
     memoryUsed = round((memory.used / 1024 / 1024 / 1000), 1)   
     memoryTotal = round((memory.total / 1024 / 1024 / 1000), 1)
-    upload = round((psutil.net_io_counters().bytes_sent / (1024**2)),1)
-    download = round((psutil.net_io_counters().bytes_recv / (1024**2)),1)
+    upload = round((psutil.net_io_counters().bytes_sent / 1e6),1)
+    download = round((psutil.net_io_counters().bytes_recv / 1e6),1)
 
     diskPartitions = psutil.disk_partitions()
     diskPercent = psutil.disk_usage(diskPartitions[0].mountpoint)                      

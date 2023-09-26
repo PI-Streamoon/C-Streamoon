@@ -278,7 +278,7 @@ while True:
 			"type": "divider"
 		}
 	]}
-        suporte = "https://hooks.slack.com/services/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"
+        suporte = "https://hooks.slack.com/services/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"
         postMsg = requests.post(suporte, data=json.dumps(mensagemSlack))
         connectJira()
     
@@ -387,8 +387,8 @@ while True:
     connection = mysql.connector.connect(
         host='localhost',
         database='streamoon',
-        user='aluno',
-        password='sptech'
+        user='StreamoonUser',
+        password='Moon2023'
     )
 
     try:

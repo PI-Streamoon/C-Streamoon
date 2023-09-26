@@ -407,6 +407,8 @@ while True:
         cursor.execute(mySql_insert_query_memory_used)
         cursor.execute(mySql_insert_query_memory_total)
         cursor.execute(mySql_insert_query_disc_percent)
+        cursor.execute(mySql_insert_query_download)
+        cursor.execute(mySql_insert_query_upload)
                       
 
         connection.commit()

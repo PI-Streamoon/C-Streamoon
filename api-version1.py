@@ -6,38 +6,7 @@ import psutil
 import platform
 import os
 import pandas as pd
-import requests
-from requests.auth import HTTPBasicAuth
-import json
-
-#Conexão Jira
-def connectJira():
-    url = "https://streamoon.atlassian.net/rest/api/3/issue"
-    auth = HTTPBasicAuth("SuporteStreamoon@gmail.com", "ATATT3xFfGF0QhLRC4Fh1bmPO3_a8GKt1rNexYJtzah5_BRgHq3C_Vfyd0RgYtIAo6wii5U2SR-_o9fI4JLpzgK8BjgBaaoMdHm9X_8GhAyGa9ya9yg7J7JjO9lIujiDcrQwxTOrXswYDzbTv9UWlX3nBTnM83J9C2WAgbnlaOD6EyurDrDHa54=87D5F38C")
-
-    headers ={
-        "Accept": "application/json",
-        "Content-Type": "application/json"
-    }
-    
-    payload = json.dumps({
-            "fields":{  
-                "summary": "Alerta Servidor",
-                "project":{"key":"STREAMOON"},
-                'issuetype':{'name':'[System] Incident'}
-            }
-    }) 
-    
-    response = requests.request(
-        "POST",
-        url,
-        data=payload,
-        headers=headers,
-        auth=auth
-    )
-   # print(json.dumps(json.loads(response.text),sort_keys=True,indent=4,separators=(",", ": ")))
-
-
+import connectionJira
 
 consoleColors = {
     "black": "\u001b[30m",
@@ -96,7 +65,7 @@ for i in range(cpuQuantity):
     consoleData[cpuName] = []
 
 
-# Capturar os dados de CPU/RAM/DISK a cada 2segs
+# Capturar os dados de CPU/RAM/DISK/UPLOAD/DOWNLOAD a cada 2segs
 while True:
 
     cpusPercent = psutil.cpu_percent(interval=1, percpu=True)
@@ -138,6 +107,8 @@ while True:
     #Integração slack!
     mensagemSlack = ""
     if (memPercent > 80):
+        connectionJira.chamado("Crítico", "A MEMORIA VIRTUAL ESTÁ ACIMA DE 80%")
+
         mensagemSlack = {
             "blocks": [
                 {
@@ -182,13 +153,14 @@ while True:
                 }
             ]
         }
-        suporte = "https://hooks.slack.com/services/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"
-        postMsg = requests.post(suporte, data=json.dumps(mensagemSlack))
-        connectJira()
+        suporte = "https://hooks.slack.com/services/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"
+        #postMsg = requests.post(suporte, data=json.dumps(mensagemSlack))
        
         
     for i in range(len(cpusPercent)):
         if int(cpusPercent[i])> 90:
+            connectionJira.chamado("Crítico", "O CPU VIRTUAL ESTÁ ACIMA DE 90%")
+
             mensagemSlack = {
 	    "blocks": [
 		{
@@ -232,13 +204,13 @@ while True:
 			"type": "divider"
 		}
 	]}
-        suporte = "https://hooks.slack.com/services/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"
-        postMsg = requests.post(suporte, data=json.dumps(mensagemSlack))
-        connectJira()
+        suporte = "https://hooks.slack.com/services/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"
+        #postMsg = requests.post(suporte, data=json.dumps(mensagemSlack))
         
            
     if (mediaCpus> 90):
-        
+        connectionJira.chamado("Crítico", "A SUA MÉDIA DE CPU ULTRAPASSOU 90%")
+
         mensagemSlack = {
 	    "blocks": [
 		{
@@ -282,11 +254,11 @@ while True:
 			"type": "divider"
 		}
 	]}
-        suporte = "https://hooks.slack.com/services/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"
-        postMsg = requests.post(suporte, data=json.dumps(mensagemSlack))
-        connectJira()
+        suporte = "https://hooks.slack.com/services/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"
+        #postMsg = requests.post(suporte, data=json.dumps(mensagemSlack))
     
     if (download < 100):
+        #connectionJira.chamado("Crítico", "A SUA ENTRADA DE REDE (DOWNLOAD) ESTÁ ABAIXO DE 100Mb")
         
         mensagemSlack = {
 	    "blocks": [
@@ -331,11 +303,11 @@ while True:
 			"type": "divider"
 		}
 	]}
-        suporte = "https://hooks.slack.com/services/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"
-        postMsg = requests.post(suporte, data=json.dumps(mensagemSlack))
-        connectJira()
+        suporte = "https://hooks.slack.com/services/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"
+        #postMsg = requests.post(suporte, data=json.dumps(mensagemSlack))
 
     if (upload < 40):
+        #connectionJira.chamado("Crítico", "A SUA SAÍDA DE REDE (UPLOAD) ESTÁ ABAIXO DE 40Mb")
         
         mensagemSlack = {
 	    "blocks": [
@@ -380,9 +352,8 @@ while True:
 			"type": "divider"
 		}
 	]}
-        suporte = "https://hooks.slack.com/services/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"
-        postMsg = requests.post(suporte, data=json.dumps(mensagemSlack))
-        connectJira()
+        suporte = "https://hooks.slack.com/services/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"
+        #postMsg = requests.post(suporte, data=json.dumps(mensagemSlack))
     
     df = pd.DataFrame(data=consoleData, index=indexHour)
     print(f"\n{df}")

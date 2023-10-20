@@ -165,7 +165,7 @@ while True:
     #Integração slack!
     mensagemSlack = ""
     if (memPercent > 80):
-        connectionJira.chamado("Crítico", "A MEMORIA VIRTUAL ESTÁ ACIMA DE 80%")
+        #connectionJira.chamado("Crítico", "A MEMORIA VIRTUAL ESTÁ ACIMA DE 80%")
 
         sendSlack("A MEMORIA VIRTUAL ESTÁ ACIMA DE 80%")
     
@@ -173,11 +173,11 @@ while True:
         
     for i in range(len(cpusPercent)):
         if int(cpusPercent[i])> 90:
-            connectionJira.chamado("Crítico", "O CPU VIRTUAL ESTÁ ACIMA DE 90%")
+            #connectionJira.chamado("Crítico", "O CPU VIRTUAL ESTÁ ACIMA DE 90%")
             sendSlack(f"O CPU VIRTUAL {i} ESTÁ ACIMA DE 90%")
            
     if (mediaCpus> 90):
-        connectionJira.chamado("Crítico", "A SUA MÉDIA DE CPU ULTRAPASSOU 90%")
+        #connectionJira.chamado("Crítico", "A SUA MÉDIA DE CPU ULTRAPASSOU 90%")
         sendSlack("A SUA MÉDIA DE CPU ULTRAPASSOU 90%")
 
         

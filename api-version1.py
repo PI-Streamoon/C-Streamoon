@@ -110,6 +110,8 @@ def showText():
 
 indexHour = []
 consoleData = {
+    "CPU": [],
+    "Frequência CPU":[],
     "MemoryPercent" : [],
     "MemoryUsed" : [],
     "MemoryTotal" : [],
@@ -146,6 +148,7 @@ while True:
         cpuName1 = (f"CPU{i+1}") 
         consoleData[cpuName1].append(cpusPercent[i])
     mediaCpus = somaCpus / len(cpusPercent)
+    frequenciaCpu = int(round(psutil.cpu_freq().current,0))
 
 
     dateNow = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -155,6 +158,8 @@ while True:
     os.system(systemClear)
 
     showText()
+    consoleData["CPU"].append(mediaCpus)
+    consoleData["Frequência CPU"].append(frequenciaCpu)
     consoleData["MemoryPercent"].append(memPercent)
     consoleData["MemoryUsed"].append(memoryUsed)
     consoleData["MemoryTotal"].append(memoryTotal)
@@ -205,23 +210,15 @@ while True:
     try:
         
         writeDB(mediaCpus, dateNow, 1)
-        writeDB(memPercent, dateNow, 2)
-        writeDB(memoryUsed, dateNow, 3)
-        writeDB(memoryTotal, dateNow, 4)
-        writeDB(diskPercent.percent, dateNow, 5)
-        writeDB(upload, dateNow, 6)
-        writeDB(download, dateNow, 7)
+        writeDB(frequenciaCpu, dateNow,2)
+        writeDB(memPercent, dateNow, 3)
+        writeDB(memoryUsed, dateNow, 4)
+        writeDB(memoryTotal, dateNow, 5)
+        writeDB(diskPercent.percent, dateNow, 6)
+        writeDB(upload, dateNow, 7)
+        writeDB(download, dateNow, 8)
 
     except mysql.connector.Error as error:
        print("Failed to insert record into table {}".format(error))
 
     time.sleep(2)
-    
-
-    
-    
-    
-    
-    
-    
-

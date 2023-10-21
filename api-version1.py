@@ -147,7 +147,7 @@ while True:
         somaCpus += cpusPercent[i]
         cpuName1 = (f"CPU{i+1}") 
         consoleData[cpuName1].append(cpusPercent[i])
-    mediaCpus = somaCpus / len(cpusPercent)
+    mediaCpus = int(round((somaCpus / len(cpusPercent)),0))
     frequenciaCpu = int(round(psutil.cpu_freq().current,0))
 
 

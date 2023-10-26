@@ -116,6 +116,8 @@ consoleData = {
     "MemoryUsed" : [],
     "MemoryTotal" : [],
     "Disk" : [],
+    "DiskInput" : [],
+    "DiskOutput" : [],
     "Upload": [],
     "Download": []
 }
@@ -134,12 +136,13 @@ while True:
     memPercent = memory.percent
     memoryUsed = round((memory.used / 1024 / 1024 / 1000), 1)   
     memoryTotal = round((memory.total / 1024 / 1024 / 1000), 1)
-    upload = round((psutil.net_io_counters().bytes_sent / 1e6),1)
-    download = round((psutil.net_io_counters().bytes_recv / 1e6),1)
+    upload = round((psutil.net_io_counters().bytes_sent / 1e6), 1)
+    download = round((psutil.net_io_counters().bytes_recv / 1e6), 1)
 
     diskPartitions = psutil.disk_partitions()
     diskPercent = psutil.disk_usage(diskPartitions[0].mountpoint)                      
-
+    diskInput = round((psutil.disk_io_counters().read_bytes / 1e9), 2)
+    diskOutput = round((psutil.disk_io_counters().write_bytes / 1e9), 2)
 
     somaCpus = 0
     mediaCpus = 0
@@ -164,6 +167,8 @@ while True:
     consoleData["MemoryUsed"].append(memoryUsed)
     consoleData["MemoryTotal"].append(memoryTotal)
     consoleData["Disk"].append(diskPercent.percent)
+    consoleData["DiskInput"].append(diskInput)
+    consoleData["DiskOutput"].append(diskOutput)
     consoleData["Upload"].append(upload)
     consoleData["Download"].append(download)
     
@@ -215,8 +220,10 @@ while True:
         writeDB(memoryUsed, dateNow, 4)
         writeDB(memoryTotal, dateNow, 5)
         writeDB(diskPercent.percent, dateNow, 6)
-        writeDB(upload, dateNow, 7)
-        writeDB(download, dateNow, 8)
+        writeDB(diskInput, dateNow, 7)
+        writeDB(diskOutput, dateNow, 8)
+        writeDB(upload, dateNow, 9)
+        writeDB(download, dateNow, 10)
 
     except mysql.connector.Error as error:
        print("Failed to insert record into table {}".format(error))

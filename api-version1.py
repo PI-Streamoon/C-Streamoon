@@ -8,6 +8,7 @@ import os
 import pandas as pd
 import connectionJira
 import login
+from sklearn.linear_model import LinearRegression
 
 consoleColors = {
     "black": "\u001b[30m",
@@ -126,6 +127,11 @@ for i in range(cpuQuantity):
     cpuName = (f"CPU{i+1}")
     consoleData[cpuName] = []
 
+arrayCPU = []
+arrayRAM = []
+arrayUpload = []
+arrayDownload = []
+
 
 # Capturar os dados de CPU/RAM/DISK/UPLOAD/DOWNLOAD a cada 2segs
 while True:
@@ -211,6 +217,38 @@ while True:
         user='StreamoonUser',
         password='Moon2023'
     )
+
+    count = 0
+    arrayCPU.append(mediaCpus)
+    arrayRAM.append(memoryUsed)
+    arrayUpload.append(upload)
+    arrayDownload.append(download)
+
+    count += 1
+
+    if len(arrayCPU) >= 10 and len(arrayRAM) >= 10 and len(arrayUpload) >= 10 and len(arrayDownload) >= 10:
+  
+        cpuPredict = ([arrayCPU])
+        ramPredict = ([arrayRAM])
+        uploadPredict = ([arrayUpload])
+        downloadPredict = ([arrayDownload])
+        
+        model1 = LinearRegression()
+        model1.fit(ramPredict, cpuPredict) # troquei a ordem awui
+
+        model2 = LinearRegression()
+        model2.fit(downloadPredict, uploadPredict)
+
+        predictionCPU = model1.predict(cpuPredict)
+        predictionUpload = model2.predict(uploadPredict)
+
+        print("Previsões cpu:", predictionCPU)
+        print("Previsões upload:", predictionUpload)
+
+        arrayCPU.clear()
+        arrayRAM.clear()
+        arrayUpload.clear()
+        arrayDownload.clear()
 
     try:
         

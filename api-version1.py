@@ -88,6 +88,17 @@ def writeDB(registro: float, dataHora: datetime.datetime, fkComponenteServidor: 
     connection.commit()
     cursor.close()
 
+
+def writeDBPredict(dado: float, predict: float):
+    mySql_insert = f"INSERT INTO predict (dadoReal, dadoPredict) VALUES ({dado}, {predict});"
+
+    cursor = connection.cursor()
+    cursor.execute(mySql_insert)
+
+    connection.commit()
+
+    cursor.close()  
+
 def showText():
     print(f"""{consoleColors['magenta']}
         []====================================================================================[]
@@ -129,9 +140,25 @@ for i in range(cpuQuantity):
 
 arrayCPU = []
 arrayRAM = []
-arrayUpload = []
-arrayDownload = []
 
+def predictsUpdate():
+    cpuPredict = ([arrayCPU])
+    ramPredict = ([arrayRAM])
+    
+    model1 = LinearRegression()
+    model1.fit(ramPredict, cpuPredict)
+
+    arrayPredictCPU = model1.predict(cpuPredict)
+    
+    count = 0
+    for row in arrayPredictCPU:
+        for element in row:
+            writeDBPredict(arrayCPU[count], element)
+            count+= 1
+
+    arrayCPU.clear()
+    arrayRAM.clear()
+    arrayPredictCPU = []
 
 # Capturar os dados de CPU/RAM/DISK/UPLOAD/DOWNLOAD a cada 2segs
 while True:
@@ -218,37 +245,11 @@ while True:
         password='Moon2023'
     )
 
-    count = 0
     arrayCPU.append(mediaCpus)
     arrayRAM.append(memoryUsed)
-    arrayUpload.append(upload)
-    arrayDownload.append(download)
 
-    count += 1
-
-    if len(arrayCPU) >= 10 and len(arrayRAM) >= 10 and len(arrayUpload) >= 10 and len(arrayDownload) >= 10:
-  
-        cpuPredict = ([arrayCPU])
-        ramPredict = ([arrayRAM])
-        uploadPredict = ([arrayUpload])
-        downloadPredict = ([arrayDownload])
-        
-        model1 = LinearRegression()
-        model1.fit(ramPredict, cpuPredict) # troquei a ordem awui
-
-        model2 = LinearRegression()
-        model2.fit(downloadPredict, uploadPredict)
-
-        predictionCPU = model1.predict(cpuPredict)
-        predictionUpload = model2.predict(uploadPredict)
-
-        print("Previsões cpu:", predictionCPU)
-        print("Previsões upload:", predictionUpload)
-
-        arrayCPU.clear()
-        arrayRAM.clear()
-        arrayUpload.clear()
-        arrayDownload.clear()
+    if len(arrayCPU) >= 10 and len(arrayRAM) >= 10:
+        predictsUpdate()
 
     try:
         

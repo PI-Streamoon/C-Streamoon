@@ -79,6 +79,14 @@ def sendSlack(msg):
     suporte = "https://hooks.slack.com/services/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"
     #postMsg = requests.post(suporte, data=json.dumps(mensagemSlack))
 
+arrayCPU = []
+arrayRAM = []
+arrayIdRegistroCPU = []
+arrayUpload = []
+arrayDownload = []
+arrayIdRegistroUpload = []
+arrayDtHora = []
+
 def writeDB(registro: float, dataHora: datetime.datetime, fkComponenteServidor: int):
     mySql_insert = f"INSERT INTO registro (registro, dtHora, fkComponenteServidor) VALUES ({registro}, '{dataHora}', {fkComponenteServidor});"
 
@@ -88,16 +96,14 @@ def writeDB(registro: float, dataHora: datetime.datetime, fkComponenteServidor: 
     connection.commit()
     cursor.close()
 
-
-def writeDBPredict(dado: float, predict: float):
-    mySql_insert = f"INSERT INTO predict (dadoReal, dadoPredict) VALUES ({dado}, {predict});"
+def writeDBPredict(predict: float, fkRegistro: int):
+    mySql_insert = f"INSERT INTO predict (dadoPredict, fkRegistro) VALUES ({predict}, {fkRegistro});"
 
     cursor = connection.cursor()
     cursor.execute(mySql_insert)
 
     connection.commit()
-
-    cursor.close()  
+    cursor.close()
 
 def showText():
     print(f"""{consoleColors['magenta']}
@@ -138,27 +144,59 @@ for i in range(cpuQuantity):
     cpuName = (f"CPU{i+1}")
     consoleData[cpuName] = []
 
-arrayCPU = []
-arrayRAM = []
-
 def predictsUpdate():
+    global arrayCPU, arrayRAM, arrayUpload, arrayDownload, arrayDtHora, arrayIdRegistroCPU, arrayIdRegistroUpload
+
     cpuPredict = ([arrayCPU])
     ramPredict = ([arrayRAM])
-    
+    uploadPredict = ([arrayUpload])
+    downloadPredict = ([arrayDownload])
+
     model1 = LinearRegression()
     model1.fit(ramPredict, cpuPredict)
+    model2 = LinearRegression()
+    model2.fit(downloadPredict, uploadPredict)
 
     arrayPredictCPU = model1.predict(cpuPredict)
+    arrayPredictUpload = model2.predict(uploadPredict)
+
+    cursor = connection.cursor()
     
-    count = 0
+    for i in arrayDtHora:
+        query1 = f"SELECT idRegistro FROM registro WHERE dtHora = '{i}' AND fkComponenteServidor = 1;";
+        cursor.execute(query1)
+        result1 = cursor.fetchone()
+        if result1 is not None:
+            idRegistro1 = result1[0]
+            arrayIdRegistroCPU.append(idRegistro1)
+
+        query2 = f"SELECT idRegistro FROM registro WHERE dtHora = '{i}' AND fkComponenteServidor = 9;";
+        cursor.execute(query2)
+        result2 = cursor.fetchone()
+        if result2 is not None:
+            idRegistro2 = result2[0]
+            arrayIdRegistroUpload.append(idRegistro2)
+
+    cursor.close()
+
+    count1 = 0
+    count2 = 0
     for row in arrayPredictCPU:
         for element in row:
-            writeDBPredict(arrayCPU[count], element)
-            count+= 1
+            writeDBPredict(element, arrayIdRegistroCPU[count1])
+            count1+= 1
+    for row in arrayPredictUpload:
+        for element in row:
+            writeDBPredict(element, arrayIdRegistroUpload[count2])
+            count2+= 1
 
     arrayCPU.clear()
     arrayRAM.clear()
-    arrayPredictCPU = []
+    arrayUpload.clear()
+    arrayDownload.clear()
+    arrayDtHora.clear()
+    arrayIdRegistroCPU.clear()
+    arrayIdRegistroUpload.clear()
 
 # Capturar os dados de CPU/RAM/DISK/UPLOAD/DOWNLOAD a cada 2segs
 while True:
@@ -247,9 +285,9 @@ while True:
 
     arrayCPU.append(mediaCpus)
     arrayRAM.append(memoryUsed)
-
-    if len(arrayCPU) >= 10 and len(arrayRAM) >= 10:
-        predictsUpdate()
+    arrayUpload.append(upload)
+    arrayDownload.append(download)
+    arrayDtHora.append(dateNow)
 
     try:
         
@@ -263,6 +301,9 @@ while True:
         writeDB(diskOutput, dateNow, 8)
         writeDB(upload, dateNow, 9)
         writeDB(download, dateNow, 10)
+
+        if len(arrayCPU) >= 10 and len(arrayRAM) >= 10 and len(arrayDtHora) >= 10 and len(arrayUpload) >= 10 and len(arrayDownload) >= 10:
+            predictsUpdate()
 
     except mysql.connector.Error as error:
        print("Failed to insert record into table {}".format(error))

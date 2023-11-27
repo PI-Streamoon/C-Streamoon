@@ -8,6 +8,10 @@ import os
 import pandas as pd
 import connectionJira
 import login
+import requests
+from requests.auth import HTTPBasicAuth
+import json
+from jira import JIRA
 
 consoleColors = {
     "black": "\u001b[30m",
@@ -75,8 +79,9 @@ def sendSlack(msg):
         ]
     }
 
-    suporte = "https://hooks.slack.com/services/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"
-    #postMsg = requests.post(suporte, data=json.dumps(mensagemSlack))
+    
+    suporte = "https://hooks.slack.com/services/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"
+    postMsg = requests.post(suporte, data=json.dumps(mensagemSlack))
 
 def writeDB(registro: float, dataHora: datetime.datetime, fkComponenteServidor: int):
     mySql_insert = f"INSERT INTO registro (registro, dtHora, fkComponenteServidor) VALUES ({registro}, '{dataHora}', {fkComponenteServidor});"
@@ -176,7 +181,7 @@ while True:
     mensagemSlack = ""
     if (memPercent > 80):
         #connectionJira.chamado("Crítico", "A MEMORIA VIRTUAL ESTÁ ACIMA DE 80%")
-
+        
         sendSlack("A MEMORIA VIRTUAL ESTÁ ACIMA DE 80%")
     
        

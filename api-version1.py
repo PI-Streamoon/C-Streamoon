@@ -12,6 +12,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 import json
 from jira import JIRA
+import pyodbc
 
 consoleColors = {
     "black": "\u001b[30m",
@@ -86,10 +87,16 @@ def sendSlack(msg):
 def writeDB(registro: float, dataHora: datetime.datetime, fkComponenteServidor: int):
     mySql_insert = f"INSERT INTO registro (registro, dtHora, fkComponenteServidor) VALUES ({registro}, '{dataHora}', {fkComponenteServidor});"
 
-    cursor = connection.cursor()
+    cursor = connectionMySql.cursor()
     cursor.execute(mySql_insert)
 
-    connection.commit()
+    connectionMySql.commit()
+    cursor.close()
+
+    cursor = connectionSQLServer.cursor()
+    cursor.execute(mySql_insert)
+
+    connectionSQLServer.commit()
     cursor.close()
 
 def showText():
@@ -210,12 +217,23 @@ while True:
     print(f"\n{df}")
 
 
-    connection = mysql.connector.connect(
+    connectionMySql = mysql.connector.connect(
         host='localhost',
         database='streamoon',
         user='StreamoonUser',
         password='Moon2023'
     )
+
+    connectionSQLServer = pyodbc.connect(
+            'DRIVER={SQL Server};'
+            'SERVER=18.208.1.120;'
+            'DATABASE=streamoon;'
+            'UID=StreamoonUser;'
+            'PWD=Moon2023;'
+            'TrustServerCertificate=yes;'
+        )
+
+
 
     try:
         

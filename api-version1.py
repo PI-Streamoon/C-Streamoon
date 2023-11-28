@@ -9,6 +9,9 @@ import pandas as pd
 import connectionJira
 import login
 from sklearn.linear_model import LinearRegression
+import numpy as np
+import random
+
 
 consoleColors = {
     "black": "\u001b[30m",
@@ -152,13 +155,16 @@ def predictsUpdate():
     uploadPredict = ([arrayUpload])
     downloadPredict = ([arrayDownload])
 
-    model1 = LinearRegression()
-    model1.fit(ramPredict, cpuPredict)
-    model2 = LinearRegression()
-    model2.fit(downloadPredict, uploadPredict)
+    model1 = LinearRegression().fit(ramPredict, cpuPredict)
+    model2 = LinearRegression().fit(downloadPredict, uploadPredict)
 
     arrayPredictCPU = model1.predict(cpuPredict)
+    iqrCPU = np.percentile(arrayPredictCPU, 75) - np.percentile(arrayPredictCPU, 25)
     arrayPredictUpload = model2.predict(uploadPredict)
+    iqrUpload = np.percentile(arrayPredictUpload, 75) - np.percentile(arrayPredictUpload, 25)
+
+    predictCPU = [valor * random.uniform((iqrCPU * 0.1), 1) for valor in arrayPredictCPU]
+    predictUpload = [valor * random.uniform((iqrUpload * 0.1), 1) for valor in arrayPredictUpload]
 
     cursor = connection.cursor()
     
@@ -181,22 +187,19 @@ def predictsUpdate():
 
     count1 = 0
     count2 = 0
-    for row in arrayPredictCPU:
+    for row in predictCPU:
         for element in row:
             writeDBPredict(element, arrayIdRegistroCPU[count1])
             count1+= 1
-    for row in arrayPredictUpload:
+    for row in predictUpload:
         for element in row:
             writeDBPredict(element, arrayIdRegistroUpload[count2])
             count2+= 1
 
-    arrayCPU.clear()
-    arrayRAM.clear()
-    arrayUpload.clear()
-    arrayDownload.clear()
-    arrayDtHora.clear()
-    arrayIdRegistroCPU.clear()
-    arrayIdRegistroUpload.clear()
+    arrays = [arrayCPU, arrayRAM, arrayUpload, arrayDownload, arrayDtHora, arrayIdRegistroCPU, arrayIdRegistroUpload]
+
+    for array in arrays:
+        array.clear()
 
 # Capturar os dados de CPU/RAM/DISK/UPLOAD/DOWNLOAD a cada 2segs
 while True:
@@ -284,7 +287,7 @@ while True:
     )
 
     arrayCPU.append(mediaCpus)
-    arrayRAM.append(memoryUsed)
+    arrayRAM.append(memPercent)
     arrayUpload.append(upload)
     arrayDownload.append(download)
     arrayDtHora.append(dateNow)

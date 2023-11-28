@@ -8,10 +8,14 @@ import os
 import pandas as pd
 import connectionJira
 import login
+import requests
+from requests.auth import HTTPBasicAuth
 from sklearn.linear_model import LinearRegression
 import numpy as np
 import random
-
+import json
+from jira import JIRA
+import pyodbc
 
 consoleColors = {
     "black": "\u001b[30m",
@@ -79,8 +83,9 @@ def sendSlack(msg):
         ]
     }
 
-    suporte = "https://hooks.slack.com/services/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"
-    #postMsg = requests.post(suporte, data=json.dumps(mensagemSlack))
+    
+    suporte = "https://hooks.slack.com/services/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"
+    postMsg = requests.post(suporte, data=json.dumps(mensagemSlack))
 
 arrayCPU = []
 arrayRAM = []
@@ -93,19 +98,31 @@ arrayDtHora = []
 def writeDB(registro: float, dataHora: datetime.datetime, fkComponenteServidor: int):
     mySql_insert = f"INSERT INTO registro (registro, dtHora, fkComponenteServidor) VALUES ({registro}, '{dataHora}', {fkComponenteServidor});"
 
-    cursor = connection.cursor()
+    cursor = connectionMySql.cursor()
     cursor.execute(mySql_insert)
 
-    connection.commit()
+    connectionMySql.commit()
+    cursor.close()
+
+    cursor = connectionSQLServer.cursor()
+    cursor.execute(mySql_insert)
+
+    connectionSQLServer.commit()
     cursor.close()
 
 def writeDBPredict(predict: float, fkRegistro: int):
     mySql_insert = f"INSERT INTO predict (dadoPredict, fkRegistro) VALUES ({predict}, {fkRegistro});"
 
-    cursor = connection.cursor()
+    cursor = connectionMySql.cursor()
     cursor.execute(mySql_insert)
 
-    connection.commit()
+    connectionMySql.commit()
+    cursor.close()
+
+    cursor = connectionSQLServer.cursor()
+    cursor.execute(mySql_insert)
+
+    connectionSQLServer.commit()
     cursor.close()
 
 def showText():
@@ -166,24 +183,41 @@ def predictsUpdate():
     predictCPU = [valor * random.uniform((iqrCPU * 0.1), 1) for valor in arrayPredictCPU]
     predictUpload = [valor * random.uniform((iqrUpload * 0.1), 1) for valor in arrayPredictUpload]
 
-    cursor = connection.cursor()
-    
     for i in arrayDtHora:
-        query1 = f"SELECT idRegistro FROM registro WHERE dtHora = '{i}' AND fkComponenteServidor = 1;";
+        query1 = f"SELECT idRegistro FROM registro WHERE dtHora = '{i}' AND fkComponenteServidor = 1;"
+        cursor = connectionMySql.cursor()
         cursor.execute(query1)
+        result = cursor.fetchone()
+        if result is not None:
+            idRegistro = result[0]
+            arrayIdRegistroCPU.append(idRegistro)
+        cursor.close()
+
+        cursor = connectionSQLServer.cursor()
+        cursor.execute(query1)
+        result = cursor.fetchone()
+        if result is not None:
+            idRegistro = result[0]
+            arrayIdRegistroCPU.append(idRegistro)
+        cursor.close()
+
+        query2 = f"SELECT idRegistro FROM registro WHERE dtHora = '{i}' AND fkComponenteServidor = 9;"
+        cursor = connectionSQLServer.cursor()
+        cursor.execute(query2)
         result1 = cursor.fetchone()
         if result1 is not None:
             idRegistro1 = result1[0]
-            arrayIdRegistroCPU.append(idRegistro1)
+            arrayIdRegistroUpload.append(idRegistro1)
+        cursor.close()
 
-        query2 = f"SELECT idRegistro FROM registro WHERE dtHora = '{i}' AND fkComponenteServidor = 9;";
+        cursor = connectionSQLServer.cursor()
         cursor.execute(query2)
         result2 = cursor.fetchone()
         if result2 is not None:
             idRegistro2 = result2[0]
             arrayIdRegistroUpload.append(idRegistro2)
+        cursor.close()
 
-    cursor.close()
 
     count1 = 0
     count2 = 0
@@ -250,7 +284,7 @@ while True:
     mensagemSlack = ""
     if (memPercent > 80):
         #connectionJira.chamado("Crítico", "A MEMORIA VIRTUAL ESTÁ ACIMA DE 80%")
-
+        
         sendSlack("A MEMORIA VIRTUAL ESTÁ ACIMA DE 80%")
     
        
@@ -279,12 +313,21 @@ while True:
     print(f"\n{df}")
 
 
-    connection = mysql.connector.connect(
+    connectionMySql = mysql.connector.connect(
         host='localhost',
         database='streamoon',
         user='StreamoonUser',
         password='Moon2023'
     )
+
+    connectionSQLServer = pyodbc.connect(
+            'DRIVER={SQL Server};'
+            'SERVER=18.208.1.120;'
+            'DATABASE=streamoon;'
+            'UID=StreamoonUser;'
+            'PWD=Moon2023;'
+            'TrustServerCertificate=yes;'
+        )
 
     arrayCPU.append(mediaCpus)
     arrayRAM.append(memPercent)

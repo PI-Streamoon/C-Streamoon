@@ -180,8 +180,8 @@ def predictsUpdate():
     arrayPredictUpload = model2.predict(uploadPredict)
     iqrUpload = np.percentile(arrayPredictUpload, 75) - np.percentile(arrayPredictUpload, 25)
 
-    predictCPU = [valor * random.uniform((iqrCPU * 0.1), 1) for valor in arrayPredictCPU]
-    predictUpload = [valor * random.uniform((iqrUpload * 0.1), 1) for valor in arrayPredictUpload]
+    predictCPU = [valor * random.uniform((iqrCPU * 0.01), 1) for valor in arrayPredictCPU]
+    predictUpload = [valor * random.uniform((iqrUpload * 0.01), 1) for valor in arrayPredictUpload]
 
     for i in arrayDtHora:
         query1 = f"SELECT idRegistro FROM registro WHERE dtHora = '{i}' AND fkComponenteServidor = 1;"
@@ -202,7 +202,7 @@ def predictsUpdate():
         cursor.close()
 
         query2 = f"SELECT idRegistro FROM registro WHERE dtHora = '{i}' AND fkComponenteServidor = 9;"
-        cursor = connectionSQLServer.cursor()
+        cursor = connectionMySql.cursor()
         cursor.execute(query2)
         result1 = cursor.fetchone()
         if result1 is not None:

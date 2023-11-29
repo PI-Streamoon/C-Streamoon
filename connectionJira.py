@@ -3,10 +3,8 @@ from requests.auth import HTTPBasicAuth
 import json
 from jira import JIRA
 
-
-
 # TOKEN PARA AUTENTICACAO
-jira_token = "ATCTT3xFfGN0L_I4FQKEN9U2RHRkHfiQYxw35GCv4icYNm6gAZh3QQ8f2KMOxyXZ0g7Gwl1V_qbWY13fmfz83-f7qVNzwhDT3w9bEW6fJvUPDq0dHf4_tAhc7FtYWvxaG3ALfKdG32y5_AY1-wsuhV-K3U1TvKnLs0p6wBtzDIzoTBzaBxn5NJ8=14EFDB67"
+jira_token = "ATCTT3xFfGN09vXbqwNE2N6w4xQ-_6HaBdmR7iynnQYqN_fok5gSLAbAZYgSQ81uU3nilCiKiyAv12ofnunvh2XpNffUfRFN6y95hm5tJaKll3-Xvxpx6AwwK-gfwM88pDL_OhHi340bvdYZusm7Ly2vIjN4wawHUVX34Ovw_jjusOeqPv7Uxek=DE9803F9"
 
 # CREDENCIAIS PARA AUTENTICAÇÃO
 url = "https://streamsecure.atlassian.net/rest/api/3/issue"
@@ -19,6 +17,7 @@ jira_connection = JIRA(
 )
 
 def chamado(mensagem, descricao):
+    
   issue_dict = {
     'project': {'key': 'STREAM'},
     'summary': mensagem,

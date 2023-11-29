@@ -8,6 +8,26 @@ import os
 import pandas as pd
 import connectionJira
 import login
+import pyodbc
+
+
+
+connectionMySql = mysql.connector.connect(
+        host='localhost',
+        database='streamoon',
+        user='StreamoonUser',
+        password='Moon2023'
+    )
+
+connectionSQLServer = pyodbc.connect(
+        'DRIVER={SQL Server};'
+        'SERVER=18.208.1.120;'
+        'DATABASE=streamoon;'
+        'UID=StreamoonUser;'
+        'PWD=Moon2023;'
+        'TrustServerCertificate=yes;'
+    )
+
 
 consoleColors = {
     "black": "\u001b[30m",
@@ -81,12 +101,15 @@ def sendSlack(msg):
 def writeDB(registro: float, dataHora: datetime.datetime, fkComponenteServidor: int):
     mySql_insert = f"INSERT INTO registro (registro, dtHora, fkComponenteServidor) VALUES ({registro}, '{dataHora}', {fkComponenteServidor});"
 
-    cursor = connection.cursor()
+    cursor = connectionMySql.cursor()
     cursor.execute(mySql_insert)
 
-    connection.commit()
     cursor.close()
 
+    cursor = connectionSQLServer.cursor()
+    cursor.execute(mySql_insert)
+
+    cursor.close()
 def showText():
     print(f"""{consoleColors['magenta']}
         []====================================================================================[]
@@ -205,13 +228,6 @@ while True:
     print(f"\n{df}")
 
 
-    connection = mysql.connector.connect(
-        host='localhost',
-        database='streamoon',
-        user='StreamoonUser',
-        password='Moon2023'
-    )
-
     try:
         
         writeDB(mediaCpus, dateNow, 11)
@@ -224,6 +240,9 @@ while True:
         writeDB(diskOutput, dateNow, 18)
         writeDB(upload, dateNow, 19)
         writeDB(download, dateNow, 20)
+
+        connectionMySql.commit()
+        connectionSQLServer.commit()
 
     except mysql.connector.Error as error:
        print("Failed to insert record into table {}".format(error))

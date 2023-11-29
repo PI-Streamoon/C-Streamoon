@@ -14,6 +14,23 @@ import json
 from jira import JIRA
 import pyodbc
 
+
+connectionMySql = mysql.connector.connect(
+        host='localhost',
+        database='streamoon',
+        user='StreamoonUser',
+        password='Moon2023'
+    )
+
+connectionSQLServer = pyodbc.connect(
+        'DRIVER={SQL Server};'
+        'SERVER=18.208.1.120;'
+        'DATABASE=streamoon;'
+        'UID=StreamoonUser;'
+        'PWD=Moon2023;'
+        'TrustServerCertificate=yes;'
+    )
+
 consoleColors = {
     "black": "\u001b[30m",
     "red": "\u001b[31m",
@@ -90,13 +107,11 @@ def writeDB(registro: float, dataHora: datetime.datetime, fkComponenteServidor: 
     cursor = connectionMySql.cursor()
     cursor.execute(mySql_insert)
 
-    connectionMySql.commit()
     cursor.close()
 
     cursor = connectionSQLServer.cursor()
     cursor.execute(mySql_insert)
 
-    connectionSQLServer.commit()
     cursor.close()
 
 def showText():
@@ -217,23 +232,6 @@ while True:
     print(f"\n{df}")
 
 
-    connectionMySql = mysql.connector.connect(
-        host='localhost',
-        database='streamoon',
-        user='StreamoonUser',
-        password='Moon2023'
-    )
-
-    connectionSQLServer = pyodbc.connect(
-            'DRIVER={SQL Server};'
-            'SERVER=18.208.1.120;'
-            'DATABASE=streamoon;'
-            'UID=StreamoonUser;'
-            'PWD=Moon2023;'
-            'TrustServerCertificate=yes;'
-        )
-
-
 
     try:
         
@@ -247,6 +245,9 @@ while True:
         writeDB(diskOutput, dateNow, 8)
         writeDB(upload, dateNow, 9)
         writeDB(download, dateNow, 10)
+
+        connectionMySql.commit()
+        connectionSQLServer.commit()
 
     except mysql.connector.Error as error:
        print("Failed to insert record into table {}".format(error))

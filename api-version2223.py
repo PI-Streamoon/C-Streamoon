@@ -8,11 +8,6 @@ import os
 import pandas as pd
 import connectionJira
 import login
-import requests
-from requests.auth import HTTPBasicAuth
-import json
-from jira import JIRA
-import pyodbc
 
 consoleColors = {
     "black": "\u001b[30m",
@@ -80,23 +75,16 @@ def sendSlack(msg):
         ]
     }
 
-    
-    suporte = "https://hooks.slack.com/services/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"
-    postMsg = requests.post(suporte, data=json.dumps(mensagemSlack))
+    suporte = "https://hooks.slack.com/services/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"
+    #postMsg = requests.post(suporte, data=json.dumps(mensagemSlack))
 
 def writeDB(registro: float, dataHora: datetime.datetime, fkComponenteServidor: int):
     mySql_insert = f"INSERT INTO registro (registro, dtHora, fkComponenteServidor) VALUES ({registro}, '{dataHora}', {fkComponenteServidor});"
 
-    cursor = connectionMySql.cursor()
+    cursor = connection.cursor()
     cursor.execute(mySql_insert)
 
-    connectionMySql.commit()
-    cursor.close()
-
-    cursor = connectionSQLServer.cursor()
-    cursor.execute(mySql_insert)
-
-    connectionSQLServer.commit()
+    connection.commit()
     cursor.close()
 
 def showText():
@@ -188,7 +176,7 @@ while True:
     mensagemSlack = ""
     if (memPercent > 80):
         #connectionJira.chamado("Crítico", "A MEMORIA VIRTUAL ESTÁ ACIMA DE 80%")
-        
+
         sendSlack("A MEMORIA VIRTUAL ESTÁ ACIMA DE 80%")
     
        
@@ -217,36 +205,25 @@ while True:
     print(f"\n{df}")
 
 
-    connectionMySql = mysql.connector.connect(
+    connection = mysql.connector.connect(
         host='localhost',
         database='streamoon',
         user='StreamoonUser',
         password='Moon2023'
     )
 
-    connectionSQLServer = pyodbc.connect(
-            'DRIVER={SQL Server};'
-            'SERVER=18.208.1.120;'
-            'DATABASE=streamoon;'
-            'UID=StreamoonUser;'
-            'PWD=Moon2023;'
-            'TrustServerCertificate=yes;'
-        )
-
-
-
     try:
         
-        writeDB(mediaCpus, dateNow, 1)
-        writeDB(frequenciaCpu, dateNow,2)
-        writeDB(memPercent, dateNow, 3)
-        writeDB(memoryUsed, dateNow, 4)
-        writeDB(memoryTotal, dateNow, 5)
-        writeDB(diskPercent.percent, dateNow, 6)
-        writeDB(diskInput, dateNow, 7)
-        writeDB(diskOutput, dateNow, 8)
-        writeDB(upload, dateNow, 9)
-        writeDB(download, dateNow, 10)
+        writeDB(mediaCpus, dateNow, 11)
+        writeDB(frequenciaCpu, dateNow,12)
+        writeDB(memPercent, dateNow, 13)
+        writeDB(memoryUsed, dateNow, 14)
+        writeDB(memoryTotal, dateNow, 15)
+        writeDB(diskPercent.percent, dateNow, 16)
+        writeDB(diskInput, dateNow, 17)
+        writeDB(diskOutput, dateNow, 18)
+        writeDB(upload, dateNow, 19)
+        writeDB(download, dateNow, 20)
 
     except mysql.connector.Error as error:
        print("Failed to insert record into table {}".format(error))

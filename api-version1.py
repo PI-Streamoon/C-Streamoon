@@ -23,7 +23,7 @@ connectionMySql = mysql.connector.connect(
     )
 
 connectionSQLServer = pyodbc.connect(
-        'DRIVER={SQL Server};'
+        'DRIVER={ODBC Driver 18 for SQL Server};'
         'SERVER=18.208.1.120;'
         'DATABASE=streamoon;'
         'UID=StreamoonUser;'
